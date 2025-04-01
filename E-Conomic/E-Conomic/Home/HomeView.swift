@@ -9,7 +9,9 @@ import SwiftUI
 
 struct HomeView: View {
 
-    @State var isImagePickerShown: Bool = false
+    @State private var isShowingImagePicker: Bool = false
+    @State private var isShowingVNDocumentCameraView = false
+    
     @State private var selectedImage: UIImage?
     @ObservedObject var viewModel = HomeViewModel()
     
@@ -19,15 +21,15 @@ struct HomeView: View {
                 Spacer()
                 Menu {
                     Button("Scan") {
-                        
+                        isShowingVNDocumentCameraView = true
                     }
                     Button("Photos") {
                         viewModel.sourceType = .photoLibrary
-                        isImagePickerShown.toggle()
+                        isShowingImagePicker.toggle()
                     }
                     Button("Camera") {
                         viewModel.sourceType = .camera
-                        isImagePickerShown.toggle()
+                        isShowingImagePicker.toggle()
                     }
                 } label: {
                     Image(systemName: "plus.circle.fill")
@@ -44,9 +46,12 @@ struct HomeView: View {
                     .font(.footnote)
                     .fontWeight(.bold)
             }
-            .sheet(isPresented: $isImagePickerShown) {
+            .sheet(isPresented: $isShowingImagePicker) {
                 ImagePickerView(selectedImage: self.$selectedImage,
                                 sourceType: viewModel.sourceType)
+            }
+            .sheet(isPresented: $isShowingVNDocumentCameraView) {
+                VNDocumentCameraViewControllerRepresentable(scanResult: $selectedImage)
             }
             .navigationTitle("E-Conomic")
             .tint(.white)
