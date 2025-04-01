@@ -67,7 +67,7 @@ struct HomeView: View {
             .tint(.white)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink(destination: ContentView()) {
+                    NavigationLink(destination: MyRecieptsView()) {
                         Image(systemName: "text.page")
                             .foregroundStyle(Color.white)
                     }
