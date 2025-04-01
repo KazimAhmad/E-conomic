@@ -11,7 +11,8 @@ struct HomeView: View {
 
     @State private var isShowingImagePicker: Bool = false
     @State private var isShowingVNDocumentCameraView = false
-    
+    @State private var isShowingSaveView = false
+
     @State private var selectedImage: UIImage?
     @ObservedObject var viewModel = HomeViewModel()
     
@@ -53,6 +54,12 @@ struct HomeView: View {
             .sheet(isPresented: $isShowingVNDocumentCameraView) {
                 VNDocumentCameraViewControllerRepresentable(scanResult: $selectedImage)
             }
+            .sheet(isPresented: $isShowingSaveView,
+                   content: {
+                if let image = selectedImage {
+                    SaveReceiptView(viewModel: SaveReceiptViewModel(image: image))
+                }
+            })
             .navigationTitle("E-Conomic")
             .tint(.white)
             .toolbar {
@@ -69,7 +76,9 @@ struct HomeView: View {
                                for: .navigationBar)
         }
         .onChange(of: selectedImage) {
-            print("image was changed")
+            if selectedImage != nil {
+                isShowingSaveView = true
+            }
         }
     }
 }
