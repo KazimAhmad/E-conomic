@@ -16,6 +16,8 @@ struct HomeView: View {
     @State private var selectedImage: UIImage?
     @ObservedObject var viewModel = HomeViewModel()
     
+    @Environment(\.managedObjectContext) private var viewContext
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -57,7 +59,8 @@ struct HomeView: View {
             .sheet(isPresented: $isShowingSaveView,
                    content: {
                 if let image = selectedImage {
-                    SaveReceiptView(viewModel: SaveReceiptViewModel(image: image))
+                    SaveReceiptView(viewModel: SaveReceiptViewModel(image: image,
+                                                                    viewContext: viewContext))
                 }
             })
             .navigationTitle("E-Conomic")

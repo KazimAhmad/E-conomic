@@ -9,11 +9,12 @@ import SwiftUI
 import UIKit
 
 class SaveReceiptViewModel: ObservableObject {
-    @Environment(\.managedObjectContext) private var viewContext
-
+    let viewContext: NSManagedObjectContext
     @Published var receipt: ReceiptObject
-    
-    init(image: UIImage) {
+    @Published var viewState: ViewState = .info
+
+    init(image: UIImage,
+         viewContext: NSManagedObjectContext) {
         self.receipt = ReceiptObject(id: UUID().uuidString,
                                      timeStamp: Date(),
                                      image: image,
@@ -21,9 +22,28 @@ class SaveReceiptViewModel: ObservableObject {
                                      details: "",
                                      total: 0.0,
                                      currency: .euro)
+        self.viewContext = viewContext
     }
     
-    func save() {
-
+    func save() async throws {
+        Task {
+            viewState = .loading
+            let newItem = Receipt(context: viewContext)
+            newItem.id = receipt.id
+            newItem.title = receipt.title
+            newItem.details = receipt.details
+            newItem.timestamp = receipt.timeStamp
+            newItem.total = receipt.total
+            newItem.currency = receipt.currency.rawValue
+            if let imageData = receipt.image.pngData() {
+                newItem.image = imageData
+            }
+            do {
+                try viewContext.save()
+            } catch {
+                print(error)
+                viewState = .error
+            }
+        }
     }
 }

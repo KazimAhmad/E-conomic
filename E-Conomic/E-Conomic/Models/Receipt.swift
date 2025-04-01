@@ -7,6 +7,13 @@
 
 import UIKit
 
+enum ViewState {
+    case loading
+    case empty
+    case info
+    case error
+}
+
 enum Currency: String, CaseIterable {
     case euro = "Euro"
     case dollars = "Dollar"

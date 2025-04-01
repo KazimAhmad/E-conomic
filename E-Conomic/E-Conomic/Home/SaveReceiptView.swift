@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct SaveReceiptView: View {
     @ObservedObject var viewModel: SaveReceiptViewModel
     @State var empty: String = ""
-    
+    @Environment(\.dismiss) var dismiss
+
     var body: some View {
         ScrollView {
             RoundedRectangle(cornerRadius: 2)
@@ -57,23 +59,37 @@ struct SaveReceiptView: View {
                 TextField(viewModel.receipt.timeStampString(),
                           text: $empty)
                 .disabled(true)
-                
-                Button {
-                    viewModel.save()
-                } label: {
-                    Text("Save")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.white)
+                if viewModel.viewState == .loading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .tint(Color.purple)
+                        .padding(.vertical, 32)
                         .frame(maxWidth: .infinity)
-                        .background {
-                            RoundedRectangle(cornerRadius: 16.0,
-                                             style: .circular)
-                            .fill(Color.purple)
-                            .frame(height: 60)
+                } else {
+                    Button {
+                        Task {
+                            do {
+                                try await viewModel.save()
+                                dismiss()
+                            } catch {
+                                //TODO: show error
+                            }
                         }
+                    } label: {
+                        Text("Save")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.white)
+                            .frame(maxWidth: .infinity)
+                            .background {
+                                RoundedRectangle(cornerRadius: 16.0,
+                                                 style: .circular)
+                                .fill(Color.purple)
+                                .frame(height: 60)
+                            }
+                    }
+                    .padding(.vertical, 32)
                 }
-                .padding(.vertical, 32)
             }
             .textFieldStyle(.roundedBorder)
             .padding()
@@ -82,5 +98,5 @@ struct SaveReceiptView: View {
 }
 
 #Preview {
-    SaveReceiptView(viewModel: SaveReceiptViewModel(image: UIImage(systemName: "text.page")!))
+    SaveReceiptView(viewModel: SaveReceiptViewModel(image: UIImage(systemName: "text.page")!, viewContext: NSManagedObjectContext()))
 }
